@@ -171,91 +171,55 @@ public:
 
   template <class T, typename... Args> void critical(T msg, Args... args){
 #ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_CRITICAL, false, msg, args...);
-#endif
-  }
-
-  template <class T, typename... Args> void criticalln(T msg, Args... args){
-#ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_CRITICAL, true, msg, args...);
+    printLevel(LOG_LEVEL_CRITICAL, msg, args...);
 #endif
   }
 
   template <class T, typename... Args> void error(T msg, Args... args){
 #ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_ERROR, false, msg, args...);
+    printLevel(LOG_LEVEL_ERROR, msg, args...);
 #endif
   }
-  
-   template <class T, typename... Args> void errorln(T msg, Args... args){
-#ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_ERROR, true, msg, args...);
-#endif
-  } 
 
   template <class T, typename... Args> void warning(T msg, Args...args){
 #ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_WARNING, false, msg, args...);
+    printLevel(LOG_LEVEL_WARNING, msg, args...);
 #endif
   }
-  
-   template <class T, typename... Args> void warningln(T msg, Args...args){
-#ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_WARNING, true, msg, args...);
-#endif
-  } 
 
   template <class T, typename... Args> void info(T msg, Args...args) {
 #ifndef DISABLE_LOGGING
-	  printLevel(LOG_LEVEL_INFO, false, msg, args...);
-#endif
-  }
-
-  template <class T, typename... Args> void infoln(T msg, Args...args) {
-#ifndef DISABLE_LOGGING
-	  printLevel(LOG_LEVEL_INFO, true, msg, args...);
+	  printLevel(LOG_LEVEL_INFO, msg, args...);
 #endif
   }
 
   template <class T, typename... Args> void debug(T msg, Args... args){
 #ifndef DISABLE_LOGGING
-	printLevel(LOG_LEVEL_DEBUG, false, msg, args...);
-#endif
-  }
-
-  template <class T, typename... Args> void debugln(T msg, Args... args){
-#ifndef DISABLE_LOGGING
-	printLevel(LOG_LEVEL_DEBUG, true, msg, args...);
+	printLevel(LOG_LEVEL_DEBUG, msg, args...);
 #endif
   }
 
   template <class T, typename... Args> void trace(T msg, Args... args){
 #ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_TRACE, false, msg, args...);
+    printLevel(LOG_LEVEL_TRACE, msg, args...);
 #endif
   }
 
-  template <class T, typename... Args> void traceln(T msg, Args... args){
-#ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_TRACE, true, msg, args...);
-#endif
-	}
-
 private:
-	void print(const char *format, va_list args);
+	void println(const char *format, va_list args);
 
-	void print(const __FlashStringHelper *format, va_list args);
+	void println(const __FlashStringHelper *format, va_list args);
 
-	void print(const Printable& obj, va_list args)
+	void println(const Printable& obj, va_list args)
 	{
 #ifndef DISABLE_LOGGING
-		_logOutput->print(obj);
+		_logOutput->println(obj);
 #endif
 	}
 
 	void printFormat(const char format, va_list *args);
 
-	template <class T> void printLevel(int level, bool cr, T msg, ...)
+	template <class T> void printLevel(int level, T msg, ...)
 	{
 #ifndef DISABLE_LOGGING
 		if (level > _level)
@@ -273,24 +237,20 @@ private:
 			_prefix(_logOutput, level);
 		}
 
-		if (_showLevel) {
-			static const char levels[] = "FEWITV";
-			_logOutput->print(levels[level - 1]);
-			_logOutput->print(": ");
-		}
+		// if (_showLevel) {
+		// 	static const char levels[] = "FEWITV";
+		// 	_logOutput->print(levels[level - 1]);
+		// 	_logOutput->print(": ");
+		// }
 
 		va_list args;
 		va_start(args, msg);
-		print(msg, args);
+		println(msg, args);
 		va_end(args);
 
 		if(_suffix != NULL)
 		{
 			_suffix(_logOutput, level);
-		}
-		if (cr)
-		{
-		    _logOutput->print('\n');
 		}
 #endif
 	}

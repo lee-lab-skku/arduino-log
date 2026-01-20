@@ -100,7 +100,7 @@ void Logging::clearSuffix()
 #endif
 }
 
-void Logging::print(const __FlashStringHelper *format, va_list args)
+void Logging::println(const __FlashStringHelper *format, va_list args)
 {
 #ifndef DISABLE_LOGGING	  	
 	PGM_P p = reinterpret_cast<PGM_P>(format);
@@ -127,13 +127,14 @@ void Logging::print(const __FlashStringHelper *format, va_list args)
 			_logOutput->print(c);
 		}
 	}
+	_logOutput->println();
 #ifdef __x86_64__
 	va_end(args_copy);
 #endif
 #endif
 }
 
-void Logging::print(const char *format, va_list args) {
+void Logging::println(const char *format, va_list args) {
 #ifndef DISABLE_LOGGING	  	
 // This copy is only necessary on some architectures (x86) to change a passed
 // array in to a va_list.
@@ -157,6 +158,7 @@ void Logging::print(const char *format, va_list args) {
 			_logOutput->print(*format);
 		}
 	}
+	_logOutput->println();
 #ifdef __x86_64__
 	va_end(args_copy);
 #endif
