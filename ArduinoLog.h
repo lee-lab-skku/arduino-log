@@ -379,5 +379,3 @@ private:
 	printfunction _suffix = NULL;
 #endif
 };
-
-extern Logging Log;
