@@ -46,11 +46,6 @@ typedef void (*printfunction)(Print*, int);
 #define LOG_LEVEL_TRACE   5
 #define LOG_LEVEL_VERBOSE 6
 
-#define CR "\n"
-#define LF "\r"
-#define NL "\n\r"
-#define LOGGING_VERSION 1_0_4
-
 /**
  * ArduinoLog is a minimalistic framework to help the programmer output log statements to an output of choice, 
  * fashioned after extensive logging libraries such as log4cpp ,log4j and log4net. In case of problems with an
@@ -370,7 +365,7 @@ private:
 		}
 		if (cr)
 		{
-		    _logOutput->print(CR);
+		    _logOutput->print('\n');
 		}
 #endif
 	}
