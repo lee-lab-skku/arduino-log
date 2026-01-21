@@ -223,12 +223,9 @@ void Logging::printInternal(char format) {
       int freeRam = (int) &freeRam - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
       _logOutput->print(freeRam);
       #elif defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_SAM)
-      extern char *__brkval;
-      extern char *__malloc_heap_start;
-      char *heapend = (char*)__brkval;
-      char *stackend = (char*)__malloc_heap_start;
-      if (heapend == 0) heapend = stackend;
-      int freeRam = (int)&stackend - (int)heapend;
+      char stackVar;
+      extern char *_end;
+      int freeRam = (int)&stackVar - (int)&_end;
       _logOutput->print(freeRam);
       #elif defined(ESP32)
       _logOutput->print(ESP.getFreeHeap());
