@@ -58,6 +58,7 @@ typedef void (*printfunction)(Print*, int);
  * %n    module/class name (set via constructor)
  * %m    raw timestamp in milliseconds since boot
  * %M    formatted timestamp (HH:MM:SS.mmm)
+ * %r    free RAM in bytes (AVR, SAMD, SAM, ESP32, ESP8266)
  * 
  */
 
