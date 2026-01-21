@@ -9,7 +9,7 @@
 
 using namespace fakeit;
 std::stringstream output_;
-::Logging Log;
+::Logging Log(LOG_LEVEL_TRACE, &Serial);
 void reset_output() {
   output_.str(std::string());
   output_.clear();
@@ -121,7 +121,6 @@ void set_up_logging_captures() {
 
 void setUp(void) {
   ArduinoFakeReset();
-  Log.begin(LOG_LEVEL_TRACE, &Serial);
   set_up_logging_captures();
 }
 void test_int_values() {
