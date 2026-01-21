@@ -275,25 +275,120 @@ void test_log_levels() {
   TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
 }
 
-void printTimestamp(Print *_logOutput) {
+void printTimestamp(Print *_logOutput, int level) {
   char c[12];
   int m = sprintf(c, "%10lu ", millis());
   _logOutput->print(c);
 }
-void printCarret(Print *_logOutput) { _logOutput->print('>'); }
+void printCarret(Print *_logOutput, int level) { _logOutput->print('>'); }
 
-// void test_prefix_and_suffix() {
-//   reset_output();
-//   When(Method(ArduinoFake(), millis)).Return(1026);
-//   Log.setPrefix(printTimestamp); // set timestamp as prefix
-//   Log.setSuffix(printCarret);    // set carret as suffix
-//   Log.info(F("Log with suffix & prefix"));
-//   Log.setPrefix(NULL); // clear prefix
-//   Log.setSuffix(NULL); // clear suffix
-//   std::stringstream expected_output;
-//   expected_output << "      1026 Log with suffix & prefix>\n";
-//   TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
-// }
+void test_prefix_and_suffix() {
+  reset_output();
+  When(Method(ArduinoFake(), millis)).Return(1026);
+  Log.setPrefix(printTimestamp); // set timestamp as prefix
+  Log.setSuffix(printCarret);    // set carret as suffix
+  Log.info(F("Log with suffix & prefix"));
+  Log.clearPrefix(); // clear prefix
+  Log.clearSuffix(); // clear suffix
+  std::stringstream expected_output;
+  expected_output << "      1026 Log with suffix & prefix\n>";
+  TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
+}
+
+void test_internal_log_level() {
+  reset_output();
+  Log.info("Level: %L");
+  Log.debug("Level: %L");
+  Log.warning("Level: %L");
+  Log.error("Level: %L");
+  Log.critical("Level: %L");
+  Log.trace("Level: %L");
+  std::stringstream expected_output;
+  expected_output << "Level: INFO\n"
+                     "Level: DBUG\n"
+                     "Level: WARN\n"
+                     "Level: ERRO\n"
+                     "Level: CRIT\n"
+                     "Level: TRCE\n";
+  TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
+}
+
+void test_internal_threshold_level() {
+  reset_output();
+  Log.info("Threshold: %v");
+  std::stringstream expected_output;
+  expected_output << "Threshold: TRCE\n"; // Log is configured with LOG_LEVEL_TRACE
+  TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
+}
+
+void test_internal_module_name() {
+  reset_output();
+  ::Logging ModuleLog(LOG_LEVEL_INFO, &Serial, "TestModule");
+  ModuleLog.info("Module: %n");
+  // Debug is below INFO threshold, so it won't print
+  std::stringstream expected_output;
+  expected_output << "Module: TestModule\n";
+  TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
+}
+
+void test_internal_millis() {
+  reset_output();
+  When(Method(ArduinoFake(), millis)).Return(12345);
+  Log.info("Timestamp: %m ms");
+  std::stringstream expected_output;
+  expected_output << "Timestamp: 12345 ms\n";
+  TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
+}
+
+void test_internal_formatted_time() {
+  reset_output();
+  When(Method(ArduinoFake(), millis)).Return(3723456); // 1:02:03.456
+  Log.info("Time: %M");
+  std::stringstream expected_output;
+  expected_output << "Time: 01:02:03.456\n";
+  TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
+}
+
+void test_internal_formatted_time_edge_cases() {
+  reset_output();
+  When(Method(ArduinoFake(), millis)).Return(0);
+  Log.info("Time: %M");
+  When(Method(ArduinoFake(), millis)).Return(9); // 00:00:00.009
+  Log.info("Time: %M");
+  When(Method(ArduinoFake(), millis)).Return(99); // 00:00:00.099
+  Log.info("Time: %M");
+  When(Method(ArduinoFake(), millis)).Return(36005001); // 10:00:05.001
+  Log.info("Time: %M");
+  std::stringstream expected_output;
+  expected_output << "Time: 00:00:00.000\n"
+                     "Time: 00:00:00.009\n"
+                     "Time: 00:00:00.099\n"
+                     "Time: 10:00:05.001\n";
+  TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
+}
+
+void test_internal_free_ram() {
+  reset_output();
+  Log.info("RAM: %r bytes");
+  // On native platform, this should print a simulated value, not N/A
+  std::string output_str = output_.str();
+  // Just verify it contains "RAM: " and "bytes" and a number
+  TEST_ASSERT_TRUE(output_str.find("RAM: ") != std::string::npos);
+  TEST_ASSERT_TRUE(output_str.find(" bytes\n") != std::string::npos);
+  // Should not be N/A on native platform with our implementation
+  TEST_ASSERT_TRUE(output_str.find("N/A") == std::string::npos);
+}
+
+void test_combined_internal_variables() {
+  reset_output();
+  When(Method(ArduinoFake(), millis)).Return(5432);
+  Log.info("[%L] Time=%m, Formatted=%M");
+  Log.warning("Level: %L, Threshold: %v");
+  std::stringstream expected_output;
+  expected_output << "[INFO] Time=5432, Formatted=00:00:05.432\n"
+                     "[WARN] Level: WARN, Threshold: TRCE\n";
+  TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
+}
 
 int main(int argc, char **argv) {
   UNITY_BEGIN();
@@ -309,6 +404,13 @@ int main(int argc, char **argv) {
   RUN_TEST(test_double_values);
   RUN_TEST(test_mixed_values);
   RUN_TEST(test_log_levels);
-  // RUN_TEST(test_prefix_and_suffix);
+  RUN_TEST(test_prefix_and_suffix);
+  RUN_TEST(test_internal_log_level);
+  RUN_TEST(test_internal_threshold_level);
+  RUN_TEST(test_internal_module_name);
+  RUN_TEST(test_internal_millis);
+  RUN_TEST(test_internal_formatted_time);
+  RUN_TEST(test_internal_formatted_time_edge_cases);
+  RUN_TEST(test_internal_free_ram);
   UNITY_END();
 }
