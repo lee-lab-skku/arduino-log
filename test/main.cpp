@@ -275,23 +275,20 @@ void test_log_levels() {
   TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
 }
 
-void printTimestamp(Print *_logOutput, int level) {
+void printTimestamp(Print *_logOutput) {
   char c[12];
   int m = sprintf(c, "%10lu ", millis());
   _logOutput->print(c);
 }
-void printCarret(Print *_logOutput, int level) { _logOutput->print('>'); }
 
-void test_prefix_and_suffix() {
+void test_prefix() {
   reset_output();
   When(Method(ArduinoFake(), millis)).Return(1026);
   Log.setPrefix(printTimestamp); // set timestamp as prefix
-  Log.setSuffix(printCarret);    // set carret as suffix
-  Log.info(F("Log with suffix & prefix"));
+  Log.info(F("Log with prefix"));
   Log.clearPrefix(); // clear prefix
-  Log.clearSuffix(); // clear suffix
   std::stringstream expected_output;
-  expected_output << "      1026 Log with suffix & prefix\n>";
+  expected_output << "      1026 Log with prefix\n";
   TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
 }
 
@@ -404,7 +401,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_double_values);
   RUN_TEST(test_mixed_values);
   RUN_TEST(test_log_levels);
-  RUN_TEST(test_prefix_and_suffix);
+  RUN_TEST(test_prefix);
   RUN_TEST(test_internal_log_level);
   RUN_TEST(test_internal_threshold_level);
   RUN_TEST(test_internal_module_name);
@@ -412,5 +409,6 @@ int main(int argc, char **argv) {
   RUN_TEST(test_internal_formatted_time);
   RUN_TEST(test_internal_formatted_time_edge_cases);
   RUN_TEST(test_internal_free_ram);
+  // RUN_TEST(test_combined_internal_variables);
   UNITY_END();
 }

@@ -19,18 +19,6 @@ void Logging::clearPrefix() {
   #endif
 }
 
-void Logging::setSuffix(printfunction f) {
-  #ifndef DISABLE_LOGGING
-    _suffix = f;
-  #endif
-}
-
-void Logging::clearSuffix() {
-  #ifndef DISABLE_LOGGING
-    _suffix = nullptr;
-  #endif
-}
-
 void Logging::println(const __FlashStringHelper *format, va_list args) {
   #ifndef DISABLE_LOGGING	  	
     PGM_P p = reinterpret_cast<PGM_P>(format);

@@ -4,7 +4,7 @@
 #include <inttypes.h>
 #include <stdarg.h>
 
-typedef void (*printfunction)(Print*, int);
+typedef void (*printfunction)(Print*);
 
 // *************************************************************************
 //  Uncomment line below to fully disable logging, and reduce project size
@@ -85,21 +85,6 @@ class Logging {
      */
     void clearPrefix();
 
-    /**
-     * Sets a function to be called after each log command.
-     * 
-     * \param f - The function to be called
-     * \return void
-     */
-    void setSuffix(printfunction f);
-
-    /**
-     * clears suffix.
-     *
-     * \return void
-     */
-    void clearSuffix();
-
     template <class T, typename... Args> void critical(T msg, Args... args) {
       #ifndef DISABLE_LOGGING
         printLevel(LOG_LEVEL_CRITICAL, msg, args...);
@@ -156,7 +141,7 @@ class Logging {
   public:
     /**
      * Print internal format identifier (non-consuming format codes)
-     * Useful for custom prefix/suffix implementations
+     * Useful for custom prefix implementations
      * Supports: %L, %v, %n, %m, %M, %r
      */
     void printInternal(char format);
@@ -170,17 +155,13 @@ class Logging {
         _currentLevel = level;
 
         if (_prefix != NULL) {
-          _prefix(_logOutput, level);
+          _prefix(_logOutput);
         }
 
         va_list args;
         va_start(args, msg);
         println(msg, args);
         va_end(args);
-
-        if(_suffix != NULL) {
-          _suffix(_logOutput, level);
-        }
       #endif
     }
 
@@ -191,6 +172,5 @@ class Logging {
       const char* _moduleName;
 
       printfunction _prefix = NULL;
-      printfunction _suffix = NULL;
     #endif
 };
