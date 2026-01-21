@@ -362,7 +362,6 @@ CMakeListsPrivate.txt
 
 # PlatformIO IDE data
 .pio/
-platformio.ini
 .vscode/
 
 # Jetbrains IDE configuration
