@@ -59,41 +59,8 @@ public:
 	/**
 	 * default Constructor
 	 */
-	Logging()
-#ifndef DISABLE_LOGGING
-		: _level(LOG_LEVEL_SILENT),
-		  _logOutput(NULL)
-#endif
-	{
-
-	}
-
-	/**
-	 * Initializing, must be called as first. Note that if you use
-	 * this variant of Init, you need to initialize the baud rate
-	 * yourself, if printer happens to be a serial port.
-	 * 
-	 * \param level - logging levels <= this will be logged.
-	 * \param printer - place that logging output will be sent to.
-	 * \return void
-	 *
-	 */
-	void begin(int level, Print *output);
-
-	/**
-	 * Set the log level.
-	 * 
-	 * \param level - The new log level.
-	 * \return void
-	 */
-	void setLevel(int level);
-
-	/**
-	 * Get the log level.
-	 *
-	 * \return The current log level.
-	 */
-	int getLevel() const;
+	explicit Logging(int level, Print* logOutput);
+	~Logging() = default;
 
 	/**
 	 * Sets a function to be called before each log command.
