@@ -1,11 +1,27 @@
 #include "ArduinoLog.hpp"
 
-Logging::Logging(int level, Print* logOutput, const char* moduleName):
-  _level(level),
+#ifndef DISABLE_LOGGING
+  int Logging::_level = LOG_LEVEL_SILENT;
+  Print* Logging::_logOutput = nullptr;
+  printfunction Logging::_prefix = nullptr;
+#endif
+
+Logging::Logging(const char* moduleName):
   _currentLevel(LOG_LEVEL_SILENT),
-  _logOutput(logOutput),
   _moduleName(moduleName)
 {}
+
+void Logging::setLevel(int level) {
+  #ifndef DISABLE_LOGGING
+    _level = level;
+  #endif
+}
+
+void Logging::setOutput(Print* output) {
+  #ifndef DISABLE_LOGGING
+    _logOutput = output;
+  #endif
+}
 
 void Logging::setPrefix(printfunction f) {
   #ifndef DISABLE_LOGGING

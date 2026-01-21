@@ -9,7 +9,7 @@
 
 using namespace fakeit;
 std::stringstream output_;
-::Logging Log(LOG_LEVEL_TRACE, &Serial);
+::Logging Log;
 void reset_output() {
   output_.str(std::string());
   output_.clear();
@@ -122,6 +122,8 @@ void set_up_logging_captures() {
 void setUp(void) {
   ArduinoFakeReset();
   set_up_logging_captures();
+  Logging::setLevel(LOG_LEVEL_TRACE);
+  Logging::setOutput(&Serial);
 }
 void test_int_values() {
   reset_output();
@@ -320,7 +322,8 @@ void test_internal_threshold_level() {
 
 void test_internal_module_name() {
   reset_output();
-  ::Logging ModuleLog(LOG_LEVEL_INFO, &Serial, "TestModule");
+  Logging::setLevel(LOG_LEVEL_INFO);
+  ::Logging ModuleLog("TestModule");
   ModuleLog.info("Module: %n");
   // Debug is below INFO threshold, so it won't print
   std::stringstream expected_output;

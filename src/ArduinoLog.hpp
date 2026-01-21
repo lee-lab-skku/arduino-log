@@ -64,26 +64,13 @@ typedef void (*printfunction)(Print*);
 
 class Logging {
   public:
-    /**
-     * default Constructor
-     */
-    explicit Logging(int level, Print* logOutput, const char* moduleName = nullptr);
+    explicit Logging(const char* moduleName = nullptr);
     ~Logging() = default;
 
-    /**
-     * Sets a function to be called before each log command.
-     * 
-     * \param f - The function to be called
-     * \return void
-     */
-    void setPrefix(printfunction f);
-
-    /**
-     * clears prefix.
-     *
-     * \return void
-     */
-    void clearPrefix();
+    static void setLevel(int level);
+    static void setOutput(Print* output);
+    static void setPrefix(printfunction f);
+    static void clearPrefix();
 
     template <class T, typename... Args> void critical(T msg, Args... args) {
       #ifndef DISABLE_LOGGING
@@ -166,11 +153,11 @@ class Logging {
     }
 
     #ifndef DISABLE_LOGGING
-      int _level;
+      static int _level;
       int _currentLevel;
-      Print* _logOutput;
+      static Print* _logOutput;
       const char* _moduleName;
 
-      printfunction _prefix = NULL;
+      static printfunction _prefix;
     #endif
 };
