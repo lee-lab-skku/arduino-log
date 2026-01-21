@@ -1,4 +1,4 @@
-#include "ArduinoLog.h"
+#include "ArduinoLog.hpp"
 #include <Arduino.h>
 #include <bitset>
 #include <iomanip>
