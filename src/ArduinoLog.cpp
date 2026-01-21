@@ -31,11 +31,10 @@ SOFTWARE.
 
 #include "ArduinoLog.hpp"
 
-void Logging::begin(int level, Print* logOutput, bool showLevel)
+void Logging::begin(int level, Print* logOutput)
 {
 #ifndef DISABLE_LOGGING
 	setLevel(level);
-	setShowLevel(showLevel);
 	_logOutput = logOutput;
 #endif
 }
@@ -53,22 +52,6 @@ int Logging::getLevel() const
 	return _level;
 #else
 	return 0;
-#endif
-}
-
-void Logging::setShowLevel(bool showLevel)
-{
-#ifndef DISABLE_LOGGING
-	_showLevel = showLevel;
-#endif
-}
-
-bool Logging::getShowLevel() const
-{
-#ifndef DISABLE_LOGGING
-	return _showLevel;
-#else
-	return false;
 #endif
 }
 

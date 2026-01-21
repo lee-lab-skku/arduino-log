@@ -62,7 +62,6 @@ public:
 	Logging()
 #ifndef DISABLE_LOGGING
 		: _level(LOG_LEVEL_SILENT),
-   		  _showLevel(true),
 		  _logOutput(NULL)
 #endif
 	{
@@ -79,7 +78,7 @@ public:
 	 * \return void
 	 *
 	 */
-	void begin(int level, Print *output, bool showLevel = true);
+	void begin(int level, Print *output);
 
 	/**
 	 * Set the log level.
@@ -95,23 +94,6 @@ public:
 	 * \return The current log level.
 	 */
 	int getLevel() const;
-
-	/**
-	 * Set whether to show the log level.
-	 * 
-	 * \param showLevel - true if the log level should be shown for each log
-	 *                    false otherwise.
-	 * \return void
-	 */
-	void setShowLevel(bool showLevel);
-
-	/**
-	 * Get whether the log level is shown during logging
-	 * 
-	 * \return true if the log level is be shown for each log
-	 *         false otherwise.
-	 */
-	bool getShowLevel() const;
 
 	/**
 	 * Sets a function to be called before each log command.
@@ -211,12 +193,6 @@ private:
 			_prefix(_logOutput, level);
 		}
 
-		// if (_showLevel) {
-		// 	static const char levels[] = "FEWITV";
-		// 	_logOutput->print(levels[level - 1]);
-		// 	_logOutput->print(": ");
-		// }
-
 		va_list args;
 		va_start(args, msg);
 		println(msg, args);
@@ -231,7 +207,6 @@ private:
 
 #ifndef DISABLE_LOGGING
 	int _level;
-	bool _showLevel;
 	Print* _logOutput;
 
 	printfunction _prefix = NULL;
