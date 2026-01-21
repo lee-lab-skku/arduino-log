@@ -51,6 +51,14 @@ typedef void (*printfunction)(Print*, int);
  * %D,%F display as double value
  * %p    display a  printable object 
  * 
+ * ---- Internal Variables (auto-injected, don't consume arguments)
+ * 
+ * %L    current log level abbreviation (CRIT, ERRO, WARN, INFO, DBUG, TRCE)
+ * %v    configured threshold/verbosity level abbreviation
+ * %n    module/class name (set via constructor)
+ * %m    raw timestamp in milliseconds since boot
+ * %M    formatted timestamp (HH:MM:SS.mmm)
+ * 
  */
 
 class Logging {
@@ -58,7 +66,7 @@ class Logging {
     /**
      * default Constructor
      */
-    explicit Logging(int level, Print* logOutput);
+    explicit Logging(int level, Print* logOutput, const char* moduleName = nullptr);
     ~Logging() = default;
 
     /**
@@ -140,10 +148,15 @@ class Logging {
 
     void printFormat(const char format, va_list *args);
 
+    const char* getLevelAbbrev(int level);
+    void printFormattedTime(unsigned long millis);
+
     template <class T> void printLevel(int level, T msg, ...) {
       #ifndef DISABLE_LOGGING
         if (level > _level)
           return;                    
+
+        _currentLevel = level;
 
         if (_prefix != NULL) {
           _prefix(_logOutput, level);
@@ -162,7 +175,9 @@ class Logging {
 
     #ifndef DISABLE_LOGGING
       int _level;
+      int _currentLevel;
       Print* _logOutput;
+      const char* _moduleName;
 
       printfunction _prefix = NULL;
       printfunction _suffix = NULL;
