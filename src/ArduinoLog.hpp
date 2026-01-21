@@ -4,8 +4,6 @@
 #include <inttypes.h>
 #include <stdarg.h>
 
-typedef void (*printfunction)(Print*);
-
 // *************************************************************************
 //  Uncomment line below to fully disable logging, and reduce project size
 // ************************************************************************
@@ -69,7 +67,7 @@ class Logging {
 
     static void setLevel(int level);
     static void setOutput(Print* output);
-    static void setPrefix(printfunction f);
+    static void setPrefix(const char* format);
     static void clearPrefix();
 
     template <class T, typename... Args> void critical(T msg, Args... args) {
@@ -134,6 +132,9 @@ class Logging {
     void printInternal(char format);
 
   private:
+    void printPrefixFormat();
+
+  private:
     template <class T> void printLevel(int level, T msg, ...) {
       #ifndef DISABLE_LOGGING
         if (level > _level)
@@ -141,8 +142,8 @@ class Logging {
 
         _currentLevel = level;
 
-        if (_prefix != NULL) {
-          _prefix(_logOutput);
+        if (_prefixFormat != nullptr) {
+          printPrefixFormat();
         }
 
         va_list args;
@@ -158,6 +159,6 @@ class Logging {
       static Print* _logOutput;
       const char* _moduleName;
 
-      static printfunction _prefix;
+      static const char* _prefixFormat;
     #endif
 };

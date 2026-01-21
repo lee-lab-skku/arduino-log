@@ -3,7 +3,7 @@
 #ifndef DISABLE_LOGGING
   int Logging::_level = LOG_LEVEL_SILENT;
   Print* Logging::_logOutput = nullptr;
-  printfunction Logging::_prefix = nullptr;
+  const char* Logging::_prefixFormat = nullptr;
 #endif
 
 Logging::Logging(const char* moduleName):
@@ -23,15 +23,15 @@ void Logging::setOutput(Print* output) {
   #endif
 }
 
-void Logging::setPrefix(printfunction f) {
+void Logging::setPrefix(const char* format) {
   #ifndef DISABLE_LOGGING
-    _prefix = f;
+    _prefixFormat = format;
   #endif
 }
 
 void Logging::clearPrefix() {
   #ifndef DISABLE_LOGGING
-    _prefix = nullptr;
+    _prefixFormat = nullptr;
   #endif
 }
 
@@ -283,5 +283,21 @@ void Logging::printFormattedTime(unsigned long ms) {
     if (remainderMs < 100) _logOutput->print('0');
     if (remainderMs < 10) _logOutput->print('0');
     _logOutput->print(remainderMs);
+  #endif
+}
+
+void Logging::printPrefixFormat() {
+  #ifndef DISABLE_LOGGING
+    if (_prefixFormat == nullptr)
+      return;
+
+    for (const char* p = _prefixFormat; *p != 0; ++p) {
+      if (*p == '%' && *(p + 1) != 0) {
+        ++p;
+        printInternal(*p);
+      } else {
+        _logOutput->print(*p);
+      }
+    }
   #endif
 }
