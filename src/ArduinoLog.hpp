@@ -1,36 +1,10 @@
-/*
-    _   ___ ___  _   _ ___ _  _  ___  _    ___   ___
-   /_\ | _ \   \| | | |_ _| \| |/ _ \| |  / _ \ / __|
-  / _ \|   / |) | |_| || || .` | (_) | |_| (_) | (_ |
- /_/ \_\_|_\___/ \___/|___|_|\_|\___/|____\___/ \___|
-
-  Log library for Arduino
-  version 1.1.1
-  https://github.com/thijse/Arduino-Log
-
-Licensed under the MIT License <http://opensource.org/licenses/MIT>.
-
-*/
 #pragma once
+#include "Arduino.h"
+
 #include <inttypes.h>
 #include <stdarg.h>
 
-// Non standard: Arduino.h also chosen if ARDUINO is not defined. To facilitate use in non-Arduino test environments
-#if ARDUINO < 100
-	#include "WProgram.h"
-#else
-	#include "Arduino.h"
-#endif
-
-// PGM stubs to facilitate use in non-Arduino test environments
-#ifndef PGM_P
-#define PGM_P  const char *
-#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
-#define PSTR(str) (str)
-#define F(string_literal) (reinterpret_cast<const __FlashStringHelper *>(PSTR(string_literal)))
-#endif
 typedef void (*printfunction)(Print*, int);
-
 
 // *************************************************************************
 //  Uncomment line below to fully disable logging, and reduce project size
