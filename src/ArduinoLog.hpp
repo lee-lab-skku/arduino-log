@@ -147,11 +147,21 @@ class Logging {
       #endif
     }
 
+  protected:
     void printFormat(const char format, va_list *args);
 
     const char* getLevelAbbrev(int level);
     void printFormattedTime(unsigned long millis);
 
+  public:
+    /**
+     * Print internal format identifier (non-consuming format codes)
+     * Useful for custom prefix/suffix implementations
+     * Supports: %L, %v, %n, %m, %M, %r
+     */
+    void printInternal(char format);
+
+  private:
     template <class T> void printLevel(int level, T msg, ...) {
       #ifndef DISABLE_LOGGING
         if (level > _level)

@@ -181,19 +181,28 @@ void Logging::printFormat(const char format, va_list *args) {
     }
     
     // Internal variables - don't consume va_arg
-    else if (format == 'L') {
-      // Current calling log level abbreviation
-      _logOutput->print(getLevelAbbrev(_currentLevel));
+    else if (format == 'L' || format == 'v' || format == 'n' || 
+             format == 'm' || format == 'M' || format == 'r') {
+      printInternal(format);
     }
-    else if (format == 'v') {
-      // Configured threshold/verbosity level abbreviation
-      _logOutput->print(getLevelAbbrev(_level));
+  #endif
+}
+
+void Logging::printInternal(char format) {
+  #ifndef DISABLE_LOGGING
+  if (format == 'L') {
+    // Current calling log level abbreviation
+    _logOutput->print(getLevelAbbrev(_currentLevel));
+  }
+  else if (format == 'v') {
+    // Configured threshold/verbosity level abbreviation
+    _logOutput->print(getLevelAbbrev(_level));
+  }
+  else if (format == 'n') {
+    // Module/class name
+    if (_moduleName != NULL) {
+      _logOutput->print(_moduleName);
     }
-    else if (format == 'n') {
-      // Module/class name
-      if (_moduleName != NULL) {
-        _logOutput->print(_moduleName);
-      }
     }
     else if (format == 'm') {
       // Raw millis timestamp
@@ -206,30 +215,30 @@ void Logging::printFormat(const char format, va_list *args) {
     else if (format == 'r') {
       // Free RAM (platform-specific)
       #if defined(ARDUINO_ARCH_AVR)
-        extern int __heap_start, *__brkval;
-        int freeRam = (int) &freeRam - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
-        _logOutput->print(freeRam);
+      extern int __heap_start, *__brkval;
+      int freeRam = (int) &freeRam - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+      _logOutput->print(freeRam);
       #elif defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_SAM)
-        extern char *__brkval;
-        extern char *__malloc_heap_start;
-        char *heapend = (char*)__brkval;
-        char *stackend = (char*)__malloc_heap_start;
-        if (heapend == 0) heapend = stackend;
-        int freeRam = (int)&stackend - (int)heapend;
-        _logOutput->print(freeRam);
+      extern char *__brkval;
+      extern char *__malloc_heap_start;
+      char *heapend = (char*)__brkval;
+      char *stackend = (char*)__malloc_heap_start;
+      if (heapend == 0) heapend = stackend;
+      int freeRam = (int)&stackend - (int)heapend;
+      _logOutput->print(freeRam);
       #elif defined(ESP32)
-        _logOutput->print(ESP.getFreeHeap());
+      _logOutput->print(ESP.getFreeHeap());
       #elif defined(ESP8266)
-        _logOutput->print(ESP.getFreeHeap());
+      _logOutput->print(ESP.getFreeHeap());
       #elif defined(__x86_64__) || defined(__i386__)
-        // Native platform - simulate free RAM for testing
-        char stackVar;
-        static char* heapStart = nullptr;
-        if (heapStart == nullptr) heapStart = &stackVar;
-        int simulatedFreeRam = (int)(&stackVar - heapStart) + 2048;
-        _logOutput->print(simulatedFreeRam);
+      // Native platform - simulate free RAM for testing
+      char stackVar;
+      static char* heapStart = nullptr;
+      if (heapStart == nullptr) heapStart = &stackVar;
+      int simulatedFreeRam = (int)(&stackVar - heapStart) + 2048;
+      _logOutput->print(simulatedFreeRam);
       #else
-        _logOutput->print(F("N/A"));
+      _logOutput->print(F("N/A"));
       #endif
     }
   #endif
