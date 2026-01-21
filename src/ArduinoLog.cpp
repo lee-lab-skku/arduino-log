@@ -4,6 +4,7 @@
   int Logging::_level = LOG_LEVEL_SILENT;
   Print* Logging::_logOutput = nullptr;
   const char* Logging::_prefixFormat = nullptr;
+  int Logging::_digit = 2;
 #endif
 
 Logging::Logging(const char* moduleName):
@@ -32,6 +33,12 @@ void Logging::setPrefix(const char* format) {
 void Logging::clearPrefix() {
   #ifndef DISABLE_LOGGING
     _prefixFormat = nullptr;
+  #endif
+}
+
+void Logging::setDigit(int digit) {
+  #ifndef DISABLE_LOGGING
+    _digit = digit;
   #endif
 }
 
@@ -113,11 +120,11 @@ void Logging::printFormat(const char format, va_list *args) {
       _logOutput->print(s);
     }
 
-    else if (format == 'd' || format == 'i') {
+    else if (format == 'd') {
       _logOutput->print(va_arg(*args, int), DEC);
     }
-    else if (format == 'D' || format == 'F') {
-      _logOutput->print(va_arg(*args, double));
+    else if (format == 'f') {
+      _logOutput->print(va_arg(*args, double), _digit);
     }
 
     else if (format == 'x') {

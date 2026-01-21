@@ -69,6 +69,7 @@ class Logging {
     static void setOutput(Print* output);
     static void setPrefix(const char* format);
     static void clearPrefix();
+    static void setDigit(int digit);
 
     template <class T, typename... Args> void critical(T msg, Args... args) {
       #ifndef DISABLE_LOGGING
@@ -158,7 +159,7 @@ class Logging {
       int _currentLevel;
       static Print* _logOutput;
       const char* _moduleName;
-
       static const char* _prefixFormat;
+      static int _digit;
     #endif
 };
