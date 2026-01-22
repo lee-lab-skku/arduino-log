@@ -130,6 +130,7 @@ class Logging {
      * Useful for custom prefix implementations
      * Supports: %L, %v, %n, %m, %M, %r
      */
+    static const char* _prefixFormat;
     void printInternal(char format);
 
   private:
@@ -159,7 +160,6 @@ class Logging {
       int _currentLevel;
       static Print* _logOutput;
       const char* _moduleName;
-      static const char* _prefixFormat;
       static int _digit;
     #endif
 };
