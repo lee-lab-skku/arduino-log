@@ -131,7 +131,8 @@ class Logging {
      * Supports: %L, %v, %n, %m, %M, %r
      */
     static const char* _prefixFormat;
-    void printInternal(char format);
+    virtual void printInternal(char format);
+    static Print* _logOutput;
 
   private:
     void printPrefixFormat();
@@ -158,7 +159,6 @@ class Logging {
     #ifndef DISABLE_LOGGING
       static int _level;
       int _currentLevel;
-      static Print* _logOutput;
       const char* _moduleName;
       static int _digit;
     #endif
