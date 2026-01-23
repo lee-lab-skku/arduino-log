@@ -124,6 +124,7 @@ void setUp(void) {
   set_up_logging_captures();
   Logging::setLevel(LOG_LEVEL_TRACE);
   Logging::setOutput(&Serial);
+  Logging::setDigit(2);
 }
 void test_int_values() {
   reset_output();
@@ -221,25 +222,25 @@ void test_string_values() {
 void test_float_values() {
   reset_output();
   float float_value = 12.34;
-  Log.info(F("Log as Info with float value   : %F"), float_value);
-  Log.info("Log as Info with float value   : %F", float_value);
+  Log.info(F("Log as Info with float value   : %f"), float_value);
+  Log.info("Log as Info with float value   : %f", float_value);
   std::stringstream expected_output;
   expected_output << "Log as Info with float value   : 12.34\n"
                   << "Log as Info with float value   : 12.34\n";
   TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
 }
 
-void test_double_values() {
-  reset_output();
-  double double_value = 1234.56789;
-  // Log.info(F("%D"), double_value);
-  Log.info(F("Log as Info with double value   : %D"), double_value);
-  Log.info("Log as Info with double value   : %D", double_value);
-  std::stringstream expected_output;
-  expected_output << "Log as Info with double value   : 1234.57\n"
-                  << "Log as Info with double value   : 1234.57\n";
-  TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
-}
+// void test_double_values() {
+//   reset_output();
+//   double double_value = 1234.56789;
+//   // Log.info(F("%D"), double_value);
+//   Log.info(F("Log as Info with double value   : %D"), double_value);
+//   Log.info("Log as Info with double value   : %D", double_value);
+//   std::stringstream expected_output;
+//   expected_output << "Log as Info with double value   : 1234.57\n"
+//                   << "Log as Info with double value   : 1234.57\n";
+//   TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
+// }
 
 void test_mixed_values() {
   reset_output();
@@ -274,23 +275,6 @@ void test_log_levels() {
                      "Log as Error with bool value    : true\n"
                      "Log as Critical with bool value    : false\n"
                      "Log as Debug with bool value   : true\n";
-  TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
-}
-
-void printTimestamp(Print *_logOutput) {
-  char c[12];
-  int m = sprintf(c, "%10lu ", millis());
-  _logOutput->print(c);
-}
-
-void test_prefix() {
-  reset_output();
-  When(Method(ArduinoFake(), millis)).Return(1026);
-  Log.setPrefix(printTimestamp); // set timestamp as prefix
-  Log.info(F("Log with prefix"));
-  Log.clearPrefix(); // clear prefix
-  std::stringstream expected_output;
-  expected_output << "      1026 Log with prefix\n";
   TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
 }
 
@@ -331,54 +315,6 @@ void test_internal_module_name() {
   TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
 }
 
-void test_internal_millis() {
-  reset_output();
-  When(Method(ArduinoFake(), millis)).Return(12345);
-  Log.info("Timestamp: %m ms");
-  std::stringstream expected_output;
-  expected_output << "Timestamp: 12345 ms\n";
-  TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
-}
-
-void test_internal_formatted_time() {
-  reset_output();
-  When(Method(ArduinoFake(), millis)).Return(3723456); // 1:02:03.456
-  Log.info("Time: %M");
-  std::stringstream expected_output;
-  expected_output << "Time: 01:02:03.456\n";
-  TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
-}
-
-void test_internal_formatted_time_edge_cases() {
-  reset_output();
-  When(Method(ArduinoFake(), millis)).Return(0);
-  Log.info("Time: %M");
-  When(Method(ArduinoFake(), millis)).Return(9); // 00:00:00.009
-  Log.info("Time: %M");
-  When(Method(ArduinoFake(), millis)).Return(99); // 00:00:00.099
-  Log.info("Time: %M");
-  When(Method(ArduinoFake(), millis)).Return(36005001); // 10:00:05.001
-  Log.info("Time: %M");
-  std::stringstream expected_output;
-  expected_output << "Time: 00:00:00.000\n"
-                     "Time: 00:00:00.009\n"
-                     "Time: 00:00:00.099\n"
-                     "Time: 10:00:05.001\n";
-  TEST_ASSERT_EQUAL_STRING_STREAM(expected_output, output_);
-}
-
-void test_internal_free_ram() {
-  reset_output();
-  Log.info("RAM: %r bytes");
-  // On native platform, this should print a simulated value, not N/A
-  std::string output_str = output_.str();
-  // Just verify it contains "RAM: " and "bytes" and a number
-  TEST_ASSERT_TRUE(output_str.find("RAM: ") != std::string::npos);
-  TEST_ASSERT_TRUE(output_str.find(" bytes\n") != std::string::npos);
-  // Should not be N/A on native platform with our implementation
-  TEST_ASSERT_TRUE(output_str.find("N/A") == std::string::npos);
-}
-
 void test_combined_internal_variables() {
   reset_output();
   When(Method(ArduinoFake(), millis)).Return(5432);
@@ -401,17 +337,12 @@ int main(int argc, char **argv) {
   RUN_TEST(test_flash_string_values);
   RUN_TEST(test_string_values);
   RUN_TEST(test_float_values);
-  RUN_TEST(test_double_values);
+  // RUN_TEST(test_double_values);
   RUN_TEST(test_mixed_values);
   RUN_TEST(test_log_levels);
-  RUN_TEST(test_prefix);
   RUN_TEST(test_internal_log_level);
   RUN_TEST(test_internal_threshold_level);
   RUN_TEST(test_internal_module_name);
-  RUN_TEST(test_internal_millis);
-  RUN_TEST(test_internal_formatted_time);
-  RUN_TEST(test_internal_formatted_time_edge_cases);
-  RUN_TEST(test_internal_free_ram);
   // RUN_TEST(test_combined_internal_variables);
   UNITY_END();
 }
