@@ -4,8 +4,6 @@
 #include <inttypes.h>
 #include <stdarg.h>
 
-typedef void (*printfunction)(Print*, int);
-
 // *************************************************************************
 //  Uncomment line below to fully disable logging, and reduce project size
 // ************************************************************************
@@ -64,41 +62,14 @@ typedef void (*printfunction)(Print*, int);
 
 class Logging {
   public:
-    /**
-     * default Constructor
-     */
-    explicit Logging(int level, Print* logOutput, const char* moduleName = nullptr);
+    explicit Logging(const char* moduleName = nullptr);
     ~Logging() = default;
 
-    /**
-     * Sets a function to be called before each log command.
-     * 
-     * \param f - The function to be called
-     * \return void
-     */
-    void setPrefix(printfunction f);
-
-    /**
-     * clears prefix.
-     *
-     * \return void
-     */
-    void clearPrefix();
-
-    /**
-     * Sets a function to be called after each log command.
-     * 
-     * \param f - The function to be called
-     * \return void
-     */
-    void setSuffix(printfunction f);
-
-    /**
-     * clears suffix.
-     *
-     * \return void
-     */
-    void clearSuffix();
+    static void setLevel(int level);
+    static void setOutput(Print* output);
+    static void setPrefix(const char* format);
+    static void clearPrefix();
+    static void setDigit(int digit);
 
     template <class T, typename... Args> void critical(T msg, Args... args) {
       #ifndef DISABLE_LOGGING
@@ -156,10 +127,13 @@ class Logging {
   public:
     /**
      * Print internal format identifier (non-consuming format codes)
-     * Useful for custom prefix/suffix implementations
+     * Useful for custom prefix implementations
      * Supports: %L, %v, %n, %m, %M, %r
      */
     void printInternal(char format);
+
+  private:
+    void printPrefixFormat();
 
   private:
     template <class T> void printLevel(int level, T msg, ...) {
@@ -169,28 +143,23 @@ class Logging {
 
         _currentLevel = level;
 
-        if (_prefix != NULL) {
-          _prefix(_logOutput, level);
+        if (_prefixFormat != nullptr) {
+          printPrefixFormat();
         }
 
         va_list args;
         va_start(args, msg);
         println(msg, args);
         va_end(args);
-
-        if(_suffix != NULL) {
-          _suffix(_logOutput, level);
-        }
       #endif
     }
 
     #ifndef DISABLE_LOGGING
-      int _level;
+      static int _level;
       int _currentLevel;
-      Print* _logOutput;
+      static Print* _logOutput;
       const char* _moduleName;
-
-      printfunction _prefix = NULL;
-      printfunction _suffix = NULL;
+      static const char* _prefixFormat;
+      static int _digit;
     #endif
 };

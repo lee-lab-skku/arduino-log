@@ -1,33 +1,44 @@
 #include "ArduinoLog.hpp"
 
-Logging::Logging(int level, Print* logOutput, const char* moduleName):
-  _level(level),
+#ifndef DISABLE_LOGGING
+  int Logging::_level = LOG_LEVEL_SILENT;
+  Print* Logging::_logOutput = nullptr;
+  const char* Logging::_prefixFormat = nullptr;
+  int Logging::_digit = 2;
+#endif
+
+Logging::Logging(const char* moduleName):
   _currentLevel(LOG_LEVEL_SILENT),
-  _logOutput(logOutput),
   _moduleName(moduleName)
 {}
 
-void Logging::setPrefix(printfunction f) {
+void Logging::setLevel(int level) {
   #ifndef DISABLE_LOGGING
-    _prefix = f;
+    _level = level;
+  #endif
+}
+
+void Logging::setOutput(Print* output) {
+  #ifndef DISABLE_LOGGING
+    _logOutput = output;
+  #endif
+}
+
+void Logging::setPrefix(const char* format) {
+  #ifndef DISABLE_LOGGING
+    _prefixFormat = format;
   #endif
 }
 
 void Logging::clearPrefix() {
   #ifndef DISABLE_LOGGING
-    _prefix = nullptr;
+    _prefixFormat = nullptr;
   #endif
 }
 
-void Logging::setSuffix(printfunction f) {
+void Logging::setDigit(int digit) {
   #ifndef DISABLE_LOGGING
-    _suffix = f;
-  #endif
-}
-
-void Logging::clearSuffix() {
-  #ifndef DISABLE_LOGGING
-    _suffix = nullptr;
+    _digit = digit;
   #endif
 }
 
@@ -109,11 +120,11 @@ void Logging::printFormat(const char format, va_list *args) {
       _logOutput->print(s);
     }
 
-    else if (format == 'd' || format == 'i') {
+    else if (format == 'd') {
       _logOutput->print(va_arg(*args, int), DEC);
     }
-    else if (format == 'D' || format == 'F') {
-      _logOutput->print(va_arg(*args, double));
+    else if (format == 'f') {
+      _logOutput->print(va_arg(*args, double), _digit);
     }
 
     else if (format == 'x') {
@@ -219,12 +230,9 @@ void Logging::printInternal(char format) {
       int freeRam = (int) &freeRam - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
       _logOutput->print(freeRam);
       #elif defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_SAM)
-      extern char *__brkval;
-      extern char *__malloc_heap_start;
-      char *heapend = (char*)__brkval;
-      char *stackend = (char*)__malloc_heap_start;
-      if (heapend == 0) heapend = stackend;
-      int freeRam = (int)&stackend - (int)heapend;
+      char stackVar;
+      extern char *_end;
+      int freeRam = (int)&stackVar - (int)&_end;
       _logOutput->print(freeRam);
       #elif defined(ESP32)
       _logOutput->print(ESP.getFreeHeap());
@@ -282,5 +290,21 @@ void Logging::printFormattedTime(unsigned long ms) {
     if (remainderMs < 100) _logOutput->print('0');
     if (remainderMs < 10) _logOutput->print('0');
     _logOutput->print(remainderMs);
+  #endif
+}
+
+void Logging::printPrefixFormat() {
+  #ifndef DISABLE_LOGGING
+    if (_prefixFormat == nullptr)
+      return;
+
+    for (const char* p = _prefixFormat; *p != 0; ++p) {
+      if (*p == '%' && *(p + 1) != 0) {
+        ++p;
+        printInternal(*p);
+      } else {
+        _logOutput->print(*p);
+      }
+    }
   #endif
 }
