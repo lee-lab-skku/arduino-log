@@ -106,6 +106,14 @@ class Logging {
         printLevel(LOG_LEVEL_TRACE, msg, args...);
       #endif
     }
+    
+    static const char* _prefixFormat;
+    virtual void printInternal(char format);
+    static Print* _logOutput;
+
+  protected:
+      void printFormat(const char format, va_list *args);
+      const char* getLevelAbbrev(int level);
 
   private:
     void println(const char *format, va_list args);
@@ -118,25 +126,8 @@ class Logging {
       #endif
     }
 
-  protected:
-    void printFormat(const char format, va_list *args);
-
-    const char* getLevelAbbrev(int level);
-
-  public:
-    /**
-     * Print internal format identifier (non-consuming format codes)
-     * Useful for custom prefix implementations
-     * Supports: %L, %v, %n
-     */
-    static const char* _prefixFormat;
-    virtual void printInternal(char format);
-    static Print* _logOutput;
-
   private:
     void printPrefixFormat();
-
-  private:
     template <class T> void printLevel(int level, T msg, ...) {
       #ifndef DISABLE_LOGGING
         if (level > _level)
