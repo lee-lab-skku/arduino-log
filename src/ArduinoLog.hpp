@@ -129,7 +129,9 @@ class Logging {
      * Useful for custom prefix implementations
      * Supports: %L, %v, %n
      */
-    void printInternal(char format);
+    static const char* _prefixFormat;
+    virtual void printInternal(char format);
+    static Print* _logOutput;
 
   private:
     void printPrefixFormat();
@@ -156,9 +158,7 @@ class Logging {
     #ifndef DISABLE_LOGGING
       static int _level;
       int _currentLevel;
-      static Print* _logOutput;
       const char* _moduleName;
-      static const char* _prefixFormat;
       static int _digit;
     #endif
 };
