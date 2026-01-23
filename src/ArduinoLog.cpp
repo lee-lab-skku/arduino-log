@@ -43,7 +43,7 @@ void Logging::setDigit(int digit) {
 }
 
 void Logging::println(const __FlashStringHelper *format, va_list args) {
-  #ifndef DISABLE_LOGGING	  	
+  #ifndef DISABLE_LOGGING
     PGM_P p = reinterpret_cast<PGM_P>(format);
     // This copy is only necessary on some architectures (x86) to change a passed
     // array in to a va_list.
@@ -75,7 +75,7 @@ void Logging::println(const __FlashStringHelper *format, va_list args) {
 }
 
 void Logging::println(const char *format, va_list args) {
-  #ifndef DISABLE_LOGGING	  	
+  #ifndef DISABLE_LOGGING
     // This copy is only necessary on some architectures (x86) to change a passed
     // array in to a va_list.
     #ifdef __x86_64__
@@ -173,7 +173,7 @@ void Logging::printFormat(const char format, va_list *args) {
         _logOutput->print(c, HEX);
       }
     }
-    
+
     else if (format == 't') {
       if (va_arg(*args, int) == 1) {
         _logOutput->print("T");
@@ -190,9 +190,9 @@ void Logging::printFormat(const char format, va_list *args) {
         _logOutput->print(F("false"));
       }
     }
-    
+
     // Internal variables - don't consume va_arg
-    else if (format == 'L' || format == 'v' || format == 'n' || 
+    else if (format == 'L' || format == 'v' || format == 'n' ||
              format == 'm' || format == 'M' || format == 'r') {
       printInternal(format);
     }
@@ -201,19 +201,19 @@ void Logging::printFormat(const char format, va_list *args) {
 
 void Logging::printInternal(char format) {
   #ifndef DISABLE_LOGGING
-  if (format == 'L') {
-    // Current calling log level abbreviation
-    _logOutput->print(getLevelAbbrev(_currentLevel));
-  }
-  else if (format == 'v') {
-    // Configured threshold/verbosity level abbreviation
-    _logOutput->print(getLevelAbbrev(_level));
-  }
-  else if (format == 'n') {
-    // Module/class name
-    if (_moduleName != NULL) {
-      _logOutput->print(_moduleName);
+    if (format == 'L') {
+      // Current calling log level abbreviation
+      _logOutput->print(getLevelAbbrev(_currentLevel));
     }
+    else if (format == 'v') {
+      // Configured threshold/verbosity level abbreviation
+      _logOutput->print(getLevelAbbrev(_level));
+    }
+    else if (format == 'n') {
+      // Module/class name
+      if (_moduleName != NULL) {
+        _logOutput->print(_moduleName);
+      }
     }
     else if (format == 'm') {
       // Raw millis timestamp
@@ -226,27 +226,28 @@ void Logging::printInternal(char format) {
     else if (format == 'r') {
       // Free RAM (platform-specific)
       #if defined(ARDUINO_ARCH_AVR)
-      extern int __heap_start, *__brkval;
-      int freeRam = (int) &freeRam - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
-      _logOutput->print(freeRam);
+        extern int __heap_start, *__brkval;
+        int freeRam = (int) &freeRam - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+        _logOutput->print(freeRam);
       #elif defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_SAM)
-      char stackVar;
-      extern char *_end;
-      int freeRam = (int)&stackVar - (int)&_end;
-      _logOutput->print(freeRam);
+        char stackVar;
+        extern char *_end;
+        int freeRam = (int)&stackVar - (int)&_end;
+        _logOutput->print(freeRam);
       #elif defined(ESP32)
-      _logOutput->print(ESP.getFreeHeap());
+        _logOutput->print(ESP.getFreeHeap());
       #elif defined(ESP8266)
-      _logOutput->print(ESP.getFreeHeap());
+        _logOutput->print(ESP.getFreeHeap());
       #elif defined(__x86_64__) || defined(__i386__)
-      // Native platform - simulate free RAM for testing
-      char stackVar;
-      static char* heapStart = nullptr;
-      if (heapStart == nullptr) heapStart = &stackVar;
-      int simulatedFreeRam = (int)(&stackVar - heapStart) + 2048;
-      _logOutput->print(simulatedFreeRam);
+        // Native platform - simulate free RAM for testing
+        char stackVar;
+        static char* heapStart = nullptr;
+        if (heapStart == nullptr)
+          heapStart = &stackVar;
+        int simulatedFreeRam = (int)(&stackVar - heapStart) + 2048;
+        _logOutput->print(simulatedFreeRam);
       #else
-      _logOutput->print(F("N/A"));
+        _logOutput->print(F("N/A"));
       #endif
     }
   #endif
