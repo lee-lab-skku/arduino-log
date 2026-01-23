@@ -53,188 +53,118 @@ typedef void (*printfunction)(Print*, int);
  * 
  */
 
-class Logging
-{
-public:
-	/**
-	 * default Constructor
-	 */
-	Logging()
-#ifndef DISABLE_LOGGING
-		: _level(LOG_LEVEL_SILENT),
-   		  _showLevel(true),
-		  _logOutput(NULL)
-#endif
-	{
+class Logging {
+  public:
+    /**
+     * default Constructor
+     */
+    explicit Logging(int level, Print* logOutput);
+    ~Logging() = default;
 
-	}
+    /**
+     * Sets a function to be called before each log command.
+     * 
+     * \param f - The function to be called
+     * \return void
+     */
+    void setPrefix(printfunction f);
 
-	/**
-	 * Initializing, must be called as first. Note that if you use
-	 * this variant of Init, you need to initialize the baud rate
-	 * yourself, if printer happens to be a serial port.
-	 * 
-	 * \param level - logging levels <= this will be logged.
-	 * \param printer - place that logging output will be sent to.
-	 * \return void
-	 *
-	 */
-	void begin(int level, Print *output, bool showLevel = true);
-
-	/**
-	 * Set the log level.
-	 * 
-	 * \param level - The new log level.
-	 * \return void
-	 */
-	void setLevel(int level);
-
-	/**
-	 * Get the log level.
-	 *
-	 * \return The current log level.
-	 */
-	int getLevel() const;
-
-	/**
-	 * Set whether to show the log level.
-	 * 
-	 * \param showLevel - true if the log level should be shown for each log
-	 *                    false otherwise.
-	 * \return void
-	 */
-	void setShowLevel(bool showLevel);
-
-	/**
-	 * Get whether the log level is shown during logging
-	 * 
-	 * \return true if the log level is be shown for each log
-	 *         false otherwise.
-	 */
-	bool getShowLevel() const;
-
-	/**
-	 * Sets a function to be called before each log command.
-	 * 
-	 * \param f - The function to be called
-	 * \return void
-	 */
-	void setPrefix(printfunction f);
-
-	/**
+    /**
      * clears prefix.
      *
      * \return void
      */
-	void clearPrefix();
+    void clearPrefix();
 
-	/**
-	 * Sets a function to be called after each log command.
-	 * 
-	 * \param f - The function to be called
-	 * \return void
-	 */
-	void setSuffix(printfunction f);
+    /**
+     * Sets a function to be called after each log command.
+     * 
+     * \param f - The function to be called
+     * \return void
+     */
+    void setSuffix(printfunction f);
 
-	/**
+    /**
      * clears suffix.
      *
      * \return void
      */
-	void clearSuffix();
+    void clearSuffix();
 
-  template <class T, typename... Args> void critical(T msg, Args... args){
-#ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_CRITICAL, msg, args...);
-#endif
-  }
+    template <class T, typename... Args> void critical(T msg, Args... args) {
+      #ifndef DISABLE_LOGGING
+        printLevel(LOG_LEVEL_CRITICAL, msg, args...);
+      #endif
+    }
 
-  template <class T, typename... Args> void error(T msg, Args... args){
-#ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_ERROR, msg, args...);
-#endif
-  }
+    template <class T, typename... Args> void error(T msg, Args... args) {
+      #ifndef DISABLE_LOGGING
+        printLevel(LOG_LEVEL_ERROR, msg, args...);
+      #endif
+    }
 
-  template <class T, typename... Args> void warning(T msg, Args...args){
-#ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_WARNING, msg, args...);
-#endif
-  }
+    template <class T, typename... Args> void warning(T msg, Args...args) {
+      #ifndef DISABLE_LOGGING
+        printLevel(LOG_LEVEL_WARNING, msg, args...);
+      #endif
+    }
 
-  template <class T, typename... Args> void info(T msg, Args...args) {
-#ifndef DISABLE_LOGGING
-	  printLevel(LOG_LEVEL_INFO, msg, args...);
-#endif
-  }
+    template <class T, typename... Args> void info(T msg, Args...args) {
+      #ifndef DISABLE_LOGGING
+        printLevel(LOG_LEVEL_INFO, msg, args...);
+      #endif
+    }
 
-  template <class T, typename... Args> void debug(T msg, Args... args){
-#ifndef DISABLE_LOGGING
-	printLevel(LOG_LEVEL_DEBUG, msg, args...);
-#endif
-  }
+    template <class T, typename... Args> void debug(T msg, Args... args) {
+      #ifndef DISABLE_LOGGING
+        printLevel(LOG_LEVEL_DEBUG, msg, args...);
+      #endif
+    }
 
-  template <class T, typename... Args> void trace(T msg, Args... args){
-#ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_TRACE, msg, args...);
-#endif
-  }
+    template <class T, typename... Args> void trace(T msg, Args... args) {
+      #ifndef DISABLE_LOGGING
+        printLevel(LOG_LEVEL_TRACE, msg, args...);
+      #endif
+    }
 
-private:
-	void println(const char *format, va_list args);
+  private:
+    void println(const char *format, va_list args);
 
-	void println(const __FlashStringHelper *format, va_list args);
+    void println(const __FlashStringHelper *format, va_list args);
 
-	void println(const Printable& obj, va_list args)
-	{
-#ifndef DISABLE_LOGGING
-		_logOutput->println(obj);
-#endif
-	}
+    void println(const Printable& obj, va_list args) {
+      #ifndef DISABLE_LOGGING
+        _logOutput->println(obj);
+      #endif
+    }
 
-	void printFormat(const char format, va_list *args);
+    void printFormat(const char format, va_list *args);
 
-	template <class T> void printLevel(int level, T msg, ...)
-	{
-#ifndef DISABLE_LOGGING
-		if (level > _level)
-		{
-			return;
-		}
-		if (level < LOG_LEVEL_SILENT) 
-		{
-			level = LOG_LEVEL_SILENT;
-		}
-			
+    template <class T> void printLevel(int level, T msg, ...) {
+      #ifndef DISABLE_LOGGING
+        if (level > _level)
+          return;                    
 
-		if (_prefix != NULL)
-		{
-			_prefix(_logOutput, level);
-		}
+        if (_prefix != NULL) {
+          _prefix(_logOutput, level);
+        }
 
-		// if (_showLevel) {
-		// 	static const char levels[] = "FEWITV";
-		// 	_logOutput->print(levels[level - 1]);
-		// 	_logOutput->print(": ");
-		// }
+        va_list args;
+        va_start(args, msg);
+        println(msg, args);
+        va_end(args);
 
-		va_list args;
-		va_start(args, msg);
-		println(msg, args);
-		va_end(args);
+        if(_suffix != NULL) {
+          _suffix(_logOutput, level);
+        }
+      #endif
+    }
 
-		if(_suffix != NULL)
-		{
-			_suffix(_logOutput, level);
-		}
-#endif
-	}
+    #ifndef DISABLE_LOGGING
+      int _level;
+      Print* _logOutput;
 
-#ifndef DISABLE_LOGGING
-	int _level;
-	bool _showLevel;
-	Print* _logOutput;
-
-	printfunction _prefix = NULL;
-	printfunction _suffix = NULL;
-#endif
+      printfunction _prefix = NULL;
+      printfunction _suffix = NULL;
+    #endif
 };
