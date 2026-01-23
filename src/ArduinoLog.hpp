@@ -122,13 +122,12 @@ class Logging {
     void printFormat(const char format, va_list *args);
 
     const char* getLevelAbbrev(int level);
-    void printFormattedTime(unsigned long millis);
 
   public:
     /**
      * Print internal format identifier (non-consuming format codes)
      * Useful for custom prefix implementations
-     * Supports: %L, %v, %n, %m, %M, %r
+     * Supports: %L, %v, %n
      */
     void printInternal(char format);
 

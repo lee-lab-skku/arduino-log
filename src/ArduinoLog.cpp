@@ -192,8 +192,7 @@ void Logging::printFormat(const char format, va_list *args) {
     }
 
     // Internal variables - don't consume va_arg
-    else if (format == 'L' || format == 'v' || format == 'n' ||
-             format == 'm' || format == 'M' || format == 'r') {
+    else if (format == 'L' || format == 'v' || format == 'n') {
       printInternal(format);
     }
   #endif
@@ -202,53 +201,15 @@ void Logging::printFormat(const char format, va_list *args) {
 void Logging::printInternal(char format) {
   #ifndef DISABLE_LOGGING
     if (format == 'L') {
-      // Current calling log level abbreviation
       _logOutput->print(getLevelAbbrev(_currentLevel));
     }
     else if (format == 'v') {
-      // Configured threshold/verbosity level abbreviation
       _logOutput->print(getLevelAbbrev(_level));
     }
     else if (format == 'n') {
-      // Module/class name
       if (_moduleName != NULL) {
         _logOutput->print(_moduleName);
       }
-    }
-    else if (format == 'm') {
-      // Raw millis timestamp
-      _logOutput->print(millis());
-    }
-    else if (format == 'M') {
-      // Formatted timestamp (HH:MM:SS.mmm)
-      printFormattedTime(millis());
-    }
-    else if (format == 'r') {
-      // Free RAM (platform-specific)
-      #if defined(ARDUINO_ARCH_AVR)
-        extern int __heap_start, *__brkval;
-        int freeRam = (int) &freeRam - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
-        _logOutput->print(freeRam);
-      #elif defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_SAM)
-        char stackVar;
-        extern char *_end;
-        int freeRam = (int)&stackVar - (int)&_end;
-        _logOutput->print(freeRam);
-      #elif defined(ESP32)
-        _logOutput->print(ESP.getFreeHeap());
-      #elif defined(ESP8266)
-        _logOutput->print(ESP.getFreeHeap());
-      #elif defined(__x86_64__) || defined(__i386__)
-        // Native platform - simulate free RAM for testing
-        char stackVar;
-        static char* heapStart = nullptr;
-        if (heapStart == nullptr)
-          heapStart = &stackVar;
-        int simulatedFreeRam = (int)(&stackVar - heapStart) + 2048;
-        _logOutput->print(simulatedFreeRam);
-      #else
-        _logOutput->print(F("N/A"));
-      #endif
     }
   #endif
 }
@@ -266,31 +227,6 @@ const char* Logging::getLevelAbbrev(int level) {
     }
   #else
     return "";
-  #endif
-}
-
-void Logging::printFormattedTime(unsigned long ms) {
-  #ifndef DISABLE_LOGGING
-    unsigned long seconds = ms / 1000;
-    unsigned long minutes = seconds / 60;
-    unsigned long hours = minutes / 60;
-    unsigned long remainderMs = ms % 1000;
-    unsigned long remainderSec = seconds % 60;
-    unsigned long remainderMin = minutes % 60;
-
-    // Print HH:MM:SS.mmm format
-    if (hours < 10) _logOutput->print('0');
-    _logOutput->print(hours);
-    _logOutput->print(':');
-    if (remainderMin < 10) _logOutput->print('0');
-    _logOutput->print(remainderMin);
-    _logOutput->print(':');
-    if (remainderSec < 10) _logOutput->print('0');
-    _logOutput->print(remainderSec);
-    _logOutput->print('.');
-    if (remainderMs < 100) _logOutput->print('0');
-    if (remainderMs < 10) _logOutput->print('0');
-    _logOutput->print(remainderMs);
   #endif
 }
 
