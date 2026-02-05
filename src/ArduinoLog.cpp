@@ -1,10 +1,10 @@
 #include "ArduinoLog.hpp"
 
 #ifndef DISABLE_LOGGING
-  int Logging::_level = LOG_LEVEL_SILENT;
+  uint8_t Logging::_level = LOG_LEVEL_SILENT;
   Print* Logging::_logOutput = nullptr;
   const char* Logging::_prefixFormat = nullptr;
-  int Logging::_digit = 2;
+  uint8_t Logging::_digit = 2;
 #endif
 
 Logging::Logging(const char* moduleName):
@@ -12,7 +12,7 @@ Logging::Logging(const char* moduleName):
   _moduleName(moduleName)
 {}
 
-void Logging::setLevel(int level) {
+void Logging::setLevel(uint8_t level) {
   #ifndef DISABLE_LOGGING
     _level = level;
   #endif
@@ -36,7 +36,7 @@ void Logging::clearPrefix() {
   #endif
 }
 
-void Logging::setDigit(int digit) {
+void Logging::setDigit(uint8_t digit) {
   #ifndef DISABLE_LOGGING
     _digit = digit;
   #endif
@@ -133,7 +133,7 @@ void Logging::printFormat(const char format, va_list *args) {
     else if (format == 'X') {
       _logOutput->print("0x");
       //_logOutput->print(va_arg(*args, int), HEX);
-      uint16_t h = (uint16_t) va_arg(*args, int);
+      uint32_t h = (uint32_t) va_arg(*args, int);
       if (h < 0xFFF) _logOutput->print('0');
       if (h < 0xFF) _logOutput->print('0');
       if (h < 0xF) _logOutput->print('0');
@@ -214,7 +214,7 @@ void Logging::printInternal(char format) {
   #endif
 }
 
-const char* Logging::getLevelAbbrev(int level) {
+const char* Logging::getLevelAbbrev(uint8_t level) {
   #ifndef DISABLE_LOGGING
     switch(level) {
       case LOG_LEVEL_CRITICAL: return LEVEL_ABBREV_CRITICAL;

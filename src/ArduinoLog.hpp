@@ -65,11 +65,11 @@ class Logging {
     explicit Logging(const char* moduleName = nullptr);
     ~Logging() = default;
 
-    static void setLevel(int level);
+    static void setLevel(uint8_t level);
     static void setOutput(Print* output);
     static void setPrefix(const char* format);
     static void clearPrefix();
-    static void setDigit(int digit);
+    static void setDigit(uint8_t digit);
 
     template <class T, typename... Args> void critical(T msg, Args... args) {
       #ifndef DISABLE_LOGGING
@@ -113,7 +113,7 @@ class Logging {
 
   protected:
       void printFormat(const char format, va_list *args);
-      const char* getLevelAbbrev(int level);
+      const char* getLevelAbbrev(uint8_t level);
 
   private:
     void println(const char *format, va_list args);
@@ -128,7 +128,7 @@ class Logging {
 
   private:
     void printPrefixFormat();
-    template <class T> void printLevel(int level, T msg, ...) {
+    template <class T> void printLevel(uint8_t level, T msg, ...) {
       #ifndef DISABLE_LOGGING
         if (level > _level)
           return;                    
@@ -147,9 +147,9 @@ class Logging {
     }
 
     #ifndef DISABLE_LOGGING
-      static int _level;
-      int _currentLevel;
+      static uint8_t _level;
+      uint8_t _currentLevel;
       const char* _moduleName;
-      static int _digit;
+      static uint8_t _digit;
     #endif
 };
