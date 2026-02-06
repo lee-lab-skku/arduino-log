@@ -136,9 +136,9 @@ void Logging::printFormat(const char format, va_list *args) {
       uint8_t size = sizeof(size_t) * 2;
       for (uint8_t i = size - 1; i > 0; i--) {
         if (h >> (i * 4)) {
-          _logOutput->print('0');
-        } else {
           break;
+        } else {
+          _logOutput->print('0');
         }
       }
       _logOutput->print(h, HEX);
