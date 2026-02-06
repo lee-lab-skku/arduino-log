@@ -132,14 +132,15 @@ void Logging::printFormat(const char format, va_list *args) {
     }
     else if (format == 'X') {
       _logOutput->print("0x");
-      uint32_t h = (uint32_t) va_arg(*args, uint32_t);
-      if (h <= 0xFFFFFFF) _logOutput->print('0');
-      if (h <= 0xFFFFFF) _logOutput->print('0');
-      if (h <= 0xFFFFF) _logOutput->print('0');
-      if (h <= 0xFFFF) _logOutput->print('0');
-      if (h <= 0xFFF) _logOutput->print('0');
-      if (h <= 0xFF) _logOutput->print('0');
-      if (h <= 0xF) _logOutput->print('0');
+      size_t h = (size_t) va_arg(*args, size_t);
+      uint8_t size = sizeof(size_t) * 2;
+      for (uint8_t i = size - 1; i > 0; i--) {
+        if (h >> (i * 4)) {
+          _logOutput->print('0');
+        } else {
+          break;
+        }
+      }
       _logOutput->print(h, HEX);
     }
 
